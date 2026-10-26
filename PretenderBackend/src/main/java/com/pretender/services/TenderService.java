@@ -39,18 +39,34 @@ public class TenderService {
     }
 
     public TenderResponse create(TenderRequest request) {
-        if (request.seekClarificationEndDateTime().isBefore(request.seekClarificationStartDateTime()))
-            throw new IllegalArgumentException("Clarification end must be after clarification start");
-        if (request.bidSubmissionEndDateTime().isBefore(request.bidSubmissionStartDateTime()))
-            throw new IllegalArgumentException("Bid submission end must be after bid submission start");
+        validateDateRanges(request);
+        return toResponse(tenders.save(apply(request, new Tender())));
+    }
 
-        Tender tender = new Tender();
+    public TenderResponse update(long id, TenderRequest request) {
+        validateDateRanges(request);
+        Tender existing = tenders.findById(id).orElseThrow(() -> new EntityNotFoundException("Pre-tender record " + id + " was not found"));
+        return toResponse(tenders.save(apply(request, existing)));
+    }
+
+    @Transactional(readOnly = true)
+    public TenderResponse get(long id) {
+        return tenders.findById(id).map(this::toResponse)
+            .orElseThrow(() -> new EntityNotFoundException("Pre-tender record " + id + " was not found"));
+    }
+
+    private Tender apply(TenderRequest request, Tender tender) {
         tender.procurementType = request.procurementType().trim();
         tender.tenderReferenceNumber = request.tenderReferenceNumber().trim();
         tender.tenderType = tenderTypes.findById(request.tenderTypeId()).orElseThrow(() -> missing("Tender Type"));
         tender.numberOfCovers = covers.findById(request.numberOfCoversId()).orElseThrow(() -> missing("Number of Covers"));
         tender.tenderCategory = categories.findById(request.tenderCategoryId()).orElseThrow(() -> missing("Tender Category"));
-        tender.workItemProductCategory = productCategories.findById(request.workItemProductCategoryId()).orElseThrow(() -> missing("Work Item Product Category"));
+        tender.workItemProductCategory = productCategories.findById(request.workItemProductCategoryId())
+            .orElseThrow(() -> missing("Work Item Product Category"));
+        if (tender.workItemProductCategory.getTenderCategory() == null
+            || !tender.workItemProductCategory.getTenderCategory().getId().equals(tender.tenderCategory.getId())) {
+            throw new IllegalArgumentException("Work Item Product Category must belong to the selected Tender Category");
+        }
         tender.numberOfBidOpeners = bidOpeners.findById(request.numberOfBidOpenersId()).orElseThrow(() -> missing("Number of Bid Openers"));
         tender.formOfContract = contracts.findById(request.formOfContractId()).orElseThrow(() -> missing("Form of Contract"));
         tender.tendererClass = tendererClasses.findById(request.tendererClassId()).orElseThrow(() -> missing("Tenderer Class"));
@@ -63,8 +79,17 @@ public class TenderService {
         tender.seekClarificationStartDateTime = request.seekClarificationStartDateTime(); tender.seekClarificationEndDateTime = request.seekClarificationEndDateTime();
         tender.bidSubmissionStartDateTime = request.bidSubmissionStartDateTime(); tender.bidSubmissionEndDateTime = request.bidSubmissionEndDateTime();
         tender.bidOpeningDateTime = request.bidOpeningDateTime(); tender.nitFileName = request.nitFileName();
+        tender.parentWorkId = request.parentWorkId(); tender.parentWorkNumber = request.parentWorkNumber();
+        tender.parentWorkDescription = request.parentWorkDescription();
         tender.dtcnFileName = request.dtcnFileName(); tender.otherFileName = request.otherFileName();
-        return toResponse(tenders.save(tender));
+        return tender;
+    }
+
+    private void validateDateRanges(TenderRequest request) {
+        if (request.seekClarificationEndDateTime().isBefore(request.seekClarificationStartDateTime()))
+            throw new IllegalArgumentException("Seek clarification end must be on or after its start");
+        if (request.bidSubmissionEndDateTime().isBefore(request.bidSubmissionStartDateTime()))
+            throw new IllegalArgumentException("Bid submission end must be on or after its start");
     }
 
     @Transactional(readOnly = true)
@@ -76,6 +101,15 @@ public class TenderService {
     private TenderResponse toResponse(Tender tender) {
         return new TenderResponse(tender.id, tender.tenderReferenceNumber, tender.procurementType,
             tender.tenderType.getName(), tender.tenderCategory.getName(), tender.tenderPublishingDateTime,
-            tender.nitFileName, tender.dtcnFileName, tender.otherFileName);
+            tender.nitFileName, tender.dtcnFileName, tender.otherFileName,
+            tender.tenderType.getId(), tender.numberOfCovers.getId(), tender.tenderCategory.getId(),
+            tender.workItemProductCategory.getId(), tender.numberOfBidOpeners.getId(), tender.formOfContract.getId(),
+            tender.bidValidityDays, tender.cover1Description, tender.cover2Description, tender.deliveryPeriodDays,
+            tender.tendererClass.getId(), tender.tendererClass.getName(), tender.emdExemption, tender.paperCostExemption,
+            tender.tenderFee, tender.tenderEmdFee, tender.preBidMeeting, tender.preBidMeetingAddress,
+            tender.documentDownloadStartDateTime, tender.seekClarificationStartDateTime, tender.seekClarificationEndDateTime,
+            tender.bidSubmissionStartDateTime, tender.bidSubmissionEndDateTime, tender.bidOpeningDateTime,
+            tender.numberOfCovers.getName(), tender.workItemProductCategory.getName(), tender.numberOfBidOpeners.getName(),
+            tender.formOfContract.getName(), tender.parentWorkId, tender.parentWorkNumber, tender.parentWorkDescription);
     }
 }

@@ -14,6 +14,7 @@ import com.pretender.entities.MasterNumberOfBidOpeners;
 import com.pretender.entities.MasterFormOfContract;
 import com.pretender.entities.MasterTendererClass;
 import com.pretender.forms.MasterOptionResponse;
+import com.pretender.forms.MasterOptionRequest;
 import com.pretender.repositories.MasterTenderTypeRepository;
 import com.pretender.repositories.MasterNumberOfCoversRepository;
 import com.pretender.repositories.MasterTenderCategoryRepository;
@@ -49,22 +50,25 @@ public class MasterDataService {
             .map(entity -> response((MasterEntity) entity)).toList();
     }
 
-    public MasterOptionResponse create(String key, String name) {
+    public MasterOptionResponse create(String key, MasterOptionRequest request) {
         MasterEntity option = newEntity(key);
-        option.setName(cleanName(name));
+        apply(key, option, request);
         return response(save(repository(key), option));
     }
 
-    public MasterOptionResponse update(String key, long id, String name) {
+    public MasterOptionResponse update(String key, long id, MasterOptionRequest request) {
         JpaRepository<?, Long> repository = repository(key);
         MasterEntity option = find(repository, id);
-        option.setName(cleanName(name));
+        apply(key, option, request);
         return response(save(repository, option));
     }
 
     public void delete(String key, long id) {
         JpaRepository<?, Long> repository = repository(key);
         find(repository, id);
+        if (key.equals("tender-category") && productCategories.existsByTenderCategory_Id(id)) {
+            throw new IllegalArgumentException("Tender Category is used by product categories and cannot be deleted");
+        }
         repository.deleteById(id);
     }
 
@@ -94,11 +98,48 @@ public class MasterDataService {
         };
     }
 
-    private String cleanName(String value) {
-        if (value == null || value.isBlank()) throw new IllegalArgumentException("Name is required");
-        String name = value.trim();
-        if (name.length() > 120) throw new IllegalArgumentException("Name cannot exceed 120 characters");
-        return name;
+    private void apply(String key, MasterEntity entity, MasterOptionRequest request) {
+        String name = request.name();
+        if (name == null || name.isBlank()) {
+            name = switch (key) {
+                case "tender-type", "number-of-bid-openers", "tenderer-class" -> firstValue(request.description(), request.code());
+                case "tender-category" -> firstValue(request.code(), request.description());
+                default -> request.code();
+            };
+        }
+        validateValue(name, "Name", 255, true);
+        validateValue(request.code(), "Code", 255, false);
+        validateValue(request.description(), "Description", 2000, false);
+        entity.setName(name);
+        entity.setCode(request.code());
+        entity.setDescription(request.description());
+
+        // Keep the old name-only API payload useful for masters that now also
+        // carry a source code/description.
+        if ((key.equals("tender-type") || key.equals("tender-category")) && entity.getCode() == null) {
+            entity.setCode(name);
+        }
+        if (key.equals("tender-type") && entity.getDescription() == null) entity.setDescription(name);
+        if (key.equals("number-of-bid-openers")) {
+            if (!(entity instanceof com.pretender.entities.MasterNumberOfBidOpeners bidOpeners))
+                throw new IllegalStateException("Unexpected bid-opener master entity");
+            bidOpeners.setBovalue(request.bovalue());
+        }
+        if (key.equals("work-item-product-category")) {
+            if (!(entity instanceof MasterWorkItemProductCategory productCategory))
+                throw new IllegalStateException("Unexpected product-category master entity");
+            productCategory.setTenderCategory(request.tenderCategoryId() == null ? null : categories.findById(request.tenderCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Tender Category master value was not found")));
+        }
+    }
+
+    private String firstValue(String preferred, String fallback) {
+        return preferred == null || preferred.isBlank() ? fallback : preferred;
+    }
+
+    private void validateValue(String value, String label, int maxLength, boolean required) {
+        if (required && (value == null || value.isBlank())) throw new IllegalArgumentException(label + " is required");
+        if (value != null && value.length() > maxLength) throw new IllegalArgumentException(label + " cannot exceed " + maxLength + " characters");
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -114,6 +155,15 @@ public class MasterDataService {
     }
 
     private MasterOptionResponse response(MasterEntity entity) {
-        return new MasterOptionResponse(entity.getId(), entity.getName());
+        Long tenderCategoryId = null;
+        String tenderCategoryName = null;
+        if (entity instanceof MasterWorkItemProductCategory productCategory && productCategory.getTenderCategory() != null) {
+            tenderCategoryId = productCategory.getTenderCategory().getId();
+            tenderCategoryName = productCategory.getTenderCategory().getName();
+        }
+        Integer bovalue = entity instanceof com.pretender.entities.MasterNumberOfBidOpeners bidOpeners
+            ? bidOpeners.getBovalue() : null;
+        return new MasterOptionResponse(entity.getId(), entity.getName(), entity.getCode(), entity.getDescription(),
+            bovalue, tenderCategoryId, tenderCategoryName, entity.getSourceRowKey());
     }
 }

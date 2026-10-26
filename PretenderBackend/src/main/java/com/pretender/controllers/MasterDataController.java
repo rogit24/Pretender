@@ -28,12 +28,13 @@ public class MasterDataController {
     @PostMapping("/{key}")
     @ResponseStatus(HttpStatus.CREATED)
     public MasterOptionResponse create(@PathVariable String key, @Valid @RequestBody MasterOptionRequest request) {
-        return masters.create(key, request.name());
+        return masters.create(key, request);
     }
 
     @PutMapping("/{key}/{id}")
-    public MasterOptionResponse update(@PathVariable String key, @PathVariable long id, @Valid @RequestBody MasterOptionRequest request) {
-        return masters.update(key, id, request.name());
+    public MasterOptionResponse update(@PathVariable String key, @PathVariable long id,
+        @Valid @RequestBody MasterOptionRequest request) {
+        return masters.update(key, id, request);
     }
 
     @DeleteMapping("/{key}/{id}")

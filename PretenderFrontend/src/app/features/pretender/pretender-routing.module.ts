@@ -14,6 +14,7 @@ const masterRoutes: Routes = [
 ];
 const routes: Routes = [
   { path: 'tenders/new', component: TenderFormComponent },
+  { path: 'tenders/:id/edit', component: TenderFormComponent },
   { path: 'tenders', component: TenderListComponent },
   ...masterRoutes,
   { path: '', redirectTo: 'tenders/new', pathMatch: 'full' },

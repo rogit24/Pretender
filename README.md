@@ -4,7 +4,7 @@ The repository contains two independent applications: [PretenderFrontend](Preten
 
 ## Start locally
 
-1. Create the PostgreSQL database and check the local settings in `PretenderBackend/application-local.properties` (ignored by Git).
+1. Create the PostgreSQL database and check the local settings in `PretenderBackend/application-local.properties` (ignored by Git). The backend applies repeatable schema updates and imports the six workbook master sheets at startup without overwriting maintained rows.
 2. Start the API from `PretenderBackend` with `mvn spring-boot:run`.
 3. Install and start the UI from `PretenderFrontend` with `npm ci` and `npm start`.
 

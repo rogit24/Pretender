@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -15,6 +17,7 @@ import com.pretender.forms.UploadedFileResponse;
 
 @Service
 public class FileStorageService {
+    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
     private final Path uploadRoot;
     public FileStorageService(@Value("${pretender.upload-dir:uploads}") String uploadDir) {
         uploadRoot = Path.of(uploadDir).toAbsolutePath().normalize();
@@ -31,7 +34,17 @@ public class FileStorageService {
             Files.copy(file.getInputStream(), uploadRoot.resolve(storedName));
             return new UploadedFileResponse(storedName, originalName);
         } catch (IOException ex) {
+            deleteQuietly(storedName);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not store uploaded file", ex);
+        }
+    }
+
+    public void deleteQuietly(String fileName) {
+        if (fileName == null || !Path.of(fileName).getFileName().toString().equals(fileName)) return;
+        try {
+            Files.deleteIfExists(uploadRoot.resolve(fileName).normalize());
+        } catch (IOException ex) {
+            logger.warn("Could not remove staged upload {} after a failed tender save", fileName, ex);
         }
     }
     public Resource load(String fileName) {

@@ -69,6 +69,12 @@ public class Tender {
     public LocalDateTime bidSubmissionEndDateTime;
     @Column(name = "bid_opening_date_time", nullable = false)
     public LocalDateTime bidOpeningDateTime;
+    @Column(name = "parent_work_id", length = 160)
+    public String parentWorkId;
+    @Column(name = "parent_work_number", length = 120)
+    public String parentWorkNumber;
+    @Column(name = "parent_work_description", columnDefinition = "text")
+    public String parentWorkDescription;
     @Column(name = "nit_file_name", length = 255)
     public String nitFileName;
     @Column(name = "dtcn_file_name", length = 255)

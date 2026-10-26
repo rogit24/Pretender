@@ -1,0 +1,28 @@
+package com.pretender.works;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
+public class MockWorksService implements WorksService {
+    public static final String SOURCE_LABEL = "DEVELOPMENT MOCK — NOT WAMIS CORE";
+    private static final List<WorkSummary> WORKS = List.of(
+        new WorkSummary("mock-work-1001", "MOCK-WORK-1001", "Development mock work: road resurfacing in a sample division", SOURCE_LABEL, true),
+        new WorkSummary("mock-work-1002", "MOCK-WORK-1002", "Development mock work: bridge maintenance in a sample district", SOURCE_LABEL, true),
+        new WorkSummary("mock-work-1003", "MOCK-WORK-1003", "Development mock work: drainage improvements for testing", SOURCE_LABEL, true),
+        new WorkSummary("mock-work-1004", "MOCK-WORK-1004", "Development mock work: culvert replacement for testing", SOURCE_LABEL, true)
+    );
+
+    @Override
+    public List<WorkSummary> search(String query) {
+        String normalized = query.toLowerCase(Locale.ROOT);
+        return WORKS.stream().filter(work -> work.workNumber().toLowerCase(Locale.ROOT).contains(normalized)
+            || work.description().toLowerCase(Locale.ROOT).contains(normalized)
+            || work.id().toLowerCase(Locale.ROOT).contains(normalized)).toList();
+    }
+
+    @Override
+    public Optional<WorkSummary> findById(String id) {
+        return WORKS.stream().filter(work -> work.id().equals(id)).findFirst();
+    }
+}

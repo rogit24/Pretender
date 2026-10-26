@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Digits;
 
 public record TenderRequest(
     @NotBlank @Size(max = 80) String procurementType,
@@ -18,16 +19,16 @@ public record TenderRequest(
     @NotNull Long numberOfBidOpenersId,
     @NotNull Long formOfContractId,
     @NotNull @Positive Integer bidValidityDays,
-    @NotBlank String cover1Description,
-    String cover2Description,
+    @NotBlank @Size(max = 2000) String cover1Description,
+    @Size(max = 2000) String cover2Description,
     @NotNull @Positive Integer deliveryPeriodDays,
     @NotNull Long tendererClassId,
     @NotNull Boolean emdExemption,
     @NotNull Boolean paperCostExemption,
-    @PositiveOrZero BigDecimal tenderFee,
-    @PositiveOrZero BigDecimal tenderEmdFee,
+    @PositiveOrZero @Digits(integer = 12, fraction = 2) BigDecimal tenderFee,
+    @PositiveOrZero @Digits(integer = 12, fraction = 2) BigDecimal tenderEmdFee,
     @NotNull Boolean preBidMeeting,
-    String preBidMeetingAddress,
+    @Size(max = 2000) String preBidMeetingAddress,
     @NotNull LocalDateTime tenderPublishingDateTime,
     @NotNull LocalDateTime documentDownloadStartDateTime,
     @NotNull LocalDateTime seekClarificationStartDateTime,
@@ -35,7 +36,32 @@ public record TenderRequest(
     @NotNull LocalDateTime bidSubmissionStartDateTime,
     @NotNull LocalDateTime bidSubmissionEndDateTime,
     @NotNull LocalDateTime bidOpeningDateTime,
+    @Size(max = 160) String parentWorkId,
+    @Size(max = 120) String parentWorkNumber,
+    @Size(max = 2000) String parentWorkDescription,
     String nitFileName,
     String dtcnFileName,
     String otherFileName
-) {}
+) {
+    public TenderRequest withParentWork(String id, String number, String description) {
+        return new TenderRequest(procurementType, tenderReferenceNumber, tenderTypeId, numberOfCoversId,
+            tenderCategoryId, workItemProductCategoryId, numberOfBidOpenersId, formOfContractId, bidValidityDays,
+            cover1Description, cover2Description, deliveryPeriodDays, tendererClassId, emdExemption,
+            paperCostExemption, tenderFee, tenderEmdFee, preBidMeeting, preBidMeetingAddress,
+            tenderPublishingDateTime, documentDownloadStartDateTime, seekClarificationStartDateTime,
+            seekClarificationEndDateTime, bidSubmissionStartDateTime, bidSubmissionEndDateTime,
+            bidOpeningDateTime, id, number, description, nitFileName, dtcnFileName, otherFileName);
+    }
+
+    public TenderRequest withFileNames(String nit, String dtcn, String other) {
+        return new TenderRequest(procurementType, tenderReferenceNumber, tenderTypeId, numberOfCoversId,
+            tenderCategoryId, workItemProductCategoryId, numberOfBidOpenersId, formOfContractId, bidValidityDays,
+            cover1Description, cover2Description, deliveryPeriodDays, tendererClassId, emdExemption,
+            paperCostExemption, tenderFee, tenderEmdFee, preBidMeeting, preBidMeetingAddress,
+            tenderPublishingDateTime, documentDownloadStartDateTime, seekClarificationStartDateTime,
+            seekClarificationEndDateTime, bidSubmissionStartDateTime, bidSubmissionEndDateTime,
+            bidOpeningDateTime, parentWorkId, parentWorkNumber, parentWorkDescription,
+            nit == null ? nitFileName : nit, dtcn == null ? dtcnFileName : dtcn,
+            other == null ? otherFileName : other);
+    }
+}
