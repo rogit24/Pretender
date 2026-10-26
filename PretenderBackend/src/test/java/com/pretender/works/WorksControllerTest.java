@@ -23,6 +23,13 @@ class WorksControllerTest {
     }
 
     @Test
+    void exposesAvailableWorksForTheParentWorkDropdown() throws Exception {
+        when(works.listAvailable()).thenReturn(List.of(new WorkSummary("mock-1", "W-1", "Road", "mock", true)));
+        mvc.perform(get("/api/works")).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].workNumber").value("W-1"));
+    }
+
+    @Test
     void searchesWorkAndRejectsBlankSearches() throws Exception {
         when(works.search("road")).thenReturn(List.of(new WorkSummary("mock-1", "W-1", "Road", "mock", true)));
         mvc.perform(get("/api/works/search").param("q", "road"))

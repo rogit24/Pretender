@@ -29,7 +29,7 @@ The API listens on `http://localhost:8080`. Master CRUD endpoints are under `/ap
 
 ### Parent-work lookup (development only)
 
-The application exposes its own local lookup at `GET /api/works/search?q=<text>` and `GET /api/works/{id}`. This is an application API backed by `WorksService`; it is not a WAMIS Core endpoint. The default development provider returns four stable sample works marked `DEVELOPMENT MOCK — NOT WAMIS CORE`. Set `PRETENDER_WORKS_PROVIDER=mock` (the default) when running locally. Setting another provider value disables the mock and startup fails unless a provider bean is supplied. The `prod` profile never enables the mock and fails startup until an approved adapter is configured.
+The application exposes its own local lookup at `GET /api/works` (dropdown choices), `GET /api/works/search?q=<text>`, and `GET /api/works/{id}`. This is an application API backed by `WorksService`; it is not a WAMIS Core endpoint. The default development provider returns four stable sample works marked `DEVELOPMENT MOCK — NOT WAMIS CORE`. Set `PRETENDER_WORKS_PROVIDER=mock` (the default) when running locally. Setting another provider value disables the mock and startup fails unless a provider bean is supplied. The `prod` profile never enables the mock and fails startup until an approved adapter is configured.
 
 The pre-tender form can select one of those sample works. The backend rechecks its stable ID and saves the ID, number and description; arbitrary client-entered work details are rejected. No other tender fields are populated from a work because no approved mapping has been supplied. These mock selections are for UI and persistence development only and must not be treated as actual WAMIS works or submitted to GePNIC.
 

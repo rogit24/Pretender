@@ -7,6 +7,12 @@ class MockWorksServiceTest {
     private final MockWorksService works = new MockWorksService();
 
     @Test
+    void listsTheFourSampleWorksForTheDropdown() {
+        assertEquals(4, works.listAvailable().size());
+        assertTrue(works.listAvailable().stream().allMatch(WorkSummary::mock));
+    }
+
+    @Test
     void searchesByNumberDescriptionAndStableIdAndMarksEveryResultAsMock() {
         assertEquals(1, works.search("bridge").size());
         assertEquals(1, works.search("1001").size());

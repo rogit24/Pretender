@@ -30,6 +30,7 @@ export class PretenderApiService {
     const params = new HttpParams().set('q', query);
     return this.http.get<WorkSummary[]>(`${this.api}/works/search`, { params });
   }
+  listWorks(): Observable<WorkSummary[]> { return this.http.get<WorkSummary[]>(`${this.api}/works`); }
   getWork(id: string): Observable<WorkSummary> { return this.http.get<WorkSummary>(`${this.api}/works/${encodeURIComponent(id)}`); }
   fileUrl(fileName: string): string { return `${this.api}/files/${encodeURIComponent(fileName)}`; }
 

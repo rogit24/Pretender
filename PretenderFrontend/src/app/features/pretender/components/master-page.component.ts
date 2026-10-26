@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -9,7 +9,7 @@ export class MasterPageComponent implements OnInit {
   definition?: MasterDefinition; options: MasterOption[] = []; categories: MasterOption[] = [];
   draft: MasterOptionDraft = this.emptyDraft(); editingId: number | null = null;
   activeTab: 'add' | 'view' = 'add'; error = ''; success = ''; loading = false; loaded = false;
-  constructor(private readonly route: ActivatedRoute, private readonly api: PretenderApiService) {}
+  constructor(private readonly route: ActivatedRoute, private readonly api: PretenderApiService, private readonly changeDetector: ChangeDetectorRef) {}
   ngOnInit(): void { this.route.data.subscribe(data => this.setMaster(data['masterKey'] as string)); }
   private setMaster(key: string): void {
     this.definition = MASTER_DEFINITIONS.find(item => item.key === key);
@@ -25,22 +25,22 @@ export class MasterPageComponent implements OnInit {
     this.error = '';
     const categories = key === 'work-item-product-category' ? this.api.listMasters('tender-category').pipe(catchError(() => of(null))) : of([] as MasterOption[]);
     forkJoin({ rows: this.api.listMasters(key), categories }).subscribe({
-      next: result => { if (this.definition?.key === key) { this.options = result.rows; this.categories = result.categories?.filter(option => !!option.code) || []; this.error = result.categories === null ? 'Could not load tender categories for product-category mapping.' : ''; this.loaded = true; this.loading = false; } },
-      error: () => { if (this.definition?.key === key) { this.error = `Could not load ${this.definition.label.toLowerCase()} values. Start the backend and check its database connection.`; this.loading = false; this.loaded = false; } }
+      next: result => { if (this.definition?.key === key) { this.options = result.rows; this.categories = result.categories?.filter(option => !!option.code) || []; this.error = result.categories === null ? 'Could not load tender categories for product-category mapping.' : ''; this.loaded = true; this.loading = false; this.changeDetector.markForCheck(); } },
+      error: () => { if (this.definition?.key === key) { this.error = `Could not load ${this.definition.label.toLowerCase()} values. Start the backend and check its database connection.`; this.loading = false; this.loaded = false; this.changeDetector.markForCheck(); } }
     });
   }
   save(): void {
     if (!this.definition) return;
     const value = { ...this.draft };
     const request = this.editingId === null ? this.api.createMaster(this.definition.key, value) : this.api.updateMaster(this.definition.key, this.editingId, value);
-    request.subscribe({ next: () => { this.success = `${this.definition?.label} value saved.`; this.error = ''; this.reset(); this.load(); }, error: () => this.error = `Could not save this ${this.definition?.label.toLowerCase()} value. Check the required fields and category mapping.` });
+    request.subscribe({ next: () => { this.success = `${this.definition?.label} value saved.`; this.error = ''; this.reset(); this.load(); this.changeDetector.markForCheck(); }, error: () => { this.error = `Could not save this ${this.definition?.label.toLowerCase()} value. Check the required fields and category mapping.`; this.changeDetector.markForCheck(); } });
   }
   edit(option: MasterOption): void {
     this.activeTab = 'add'; this.editingId = option.id;
     this.draft = { name: option.name || '', code: option.code || '', description: option.description || '', bovalue: option.bovalue ?? null, tenderCategoryId: option.tenderCategoryId ?? null };
     this.success = ''; this.error = '';
   }
-  remove(option: MasterOption): void { if (!this.definition) return; this.api.deleteMaster(this.definition.key, option.id).subscribe({ next: () => { this.success = `${this.definition?.label} value deleted.`; this.load(); }, error: () => this.error = 'This value may already be used by a tender and cannot be deleted.' }); }
+  remove(option: MasterOption): void { if (!this.definition) return; this.api.deleteMaster(this.definition.key, option.id).subscribe({ next: () => { this.success = `${this.definition?.label} value deleted.`; this.load(); this.changeDetector.markForCheck(); }, error: () => { this.error = 'This value may already be used by a tender and cannot be deleted.'; this.changeDetector.markForCheck(); } }); }
   reset(): void { this.draft = this.emptyDraft(); this.editingId = null; }
   setField(key: MasterFieldKey, value: string | number | null): void {
     if (key === 'bovalue') this.draft.bovalue = value === null || value === '' ? null : Number(value);

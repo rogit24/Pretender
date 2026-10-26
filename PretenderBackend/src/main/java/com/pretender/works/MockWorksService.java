@@ -14,6 +14,9 @@ public class MockWorksService implements WorksService {
     );
 
     @Override
+    public List<WorkSummary> listAvailable() { return WORKS; }
+
+    @Override
     public List<WorkSummary> search(String query) {
         String normalized = query.toLowerCase(Locale.ROOT);
         return WORKS.stream().filter(work -> work.workNumber().toLowerCase(Locale.ROOT).contains(normalized)
