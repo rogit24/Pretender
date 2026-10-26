@@ -1,0 +1,4 @@
+# Copy to application-local.properties (ignored by git) and edit for your local PostgreSQL instance.
+spring.datasource.url=jdbc:postgresql://localhost:5432/pretender_db
+spring.datasource.username=postgres
+spring.datasource.password=replace-with-local-password

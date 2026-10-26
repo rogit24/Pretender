@@ -1,0 +1,34 @@
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand-mark">P</div><div class="brand-title">PRETENDER <span>WORKS &amp; ACCOUNTS MANAGEMENT SYSTEM</span></div>
+    <div class="topbar-right"><span class="online-dot"></span><span>Local workspace</span><button class="avatar" aria-label="User profile">P</button></div>
+  </header>
+  <div class="workspace">
+    <nav class="module-rail" aria-label="Modules">
+      <button class="rail-item" [class.selected]="activeModule === 'Profile'" (click)="toggleModule('Profile')"><span class="rail-icon">◉</span><span>Profile</span></button>
+      <button class="rail-item" [class.selected]="activeModule === 'Master'" (click)="toggleModule('Master')"><span class="rail-icon">▣</span><span>Master</span></button>
+      <button class="rail-item" [class.selected]="activeModule === 'HRMS'" (click)="toggleModule('HRMS')"><span class="rail-icon">▤</span><span>HRMS</span></button>
+      <button class="rail-item" [class.selected]="activeModule === 'Pretender'" (click)="toggleModule('Pretender')"><span class="rail-icon">▣</span><span>Pretender</span></button>
+      <button class="rail-item" [class.selected]="activeModule === 'e-MB'" (click)="toggleModule('e-MB')"><span class="rail-icon">▤</span><span>e-MB</span></button>
+      <button class="rail-item" [class.selected]="activeModule === 'eBill'" (click)="toggleModule('eBill')"><span class="rail-icon">▤</span><span>eBill</span></button>
+      <button class="rail-item" [class.selected]="activeModule === 'UM Module'" (click)="toggleModule('UM Module')"><span class="rail-icon">▣</span><span>UM Module</span></button>
+    </nav>
+    <aside class="section-sidebar" *ngIf="activeModule === 'Pretender'">
+      <div class="side-title"><strong>Pretender</strong><span>‹</span></div>
+      <button class="side-section" [attr.aria-expanded]="mastersOpen" (click)="toggleMasters()"><span>Masters</span><span>{{ mastersOpen ? '⌄' : '›' }}</span></button>
+      <div class="side-links" *ngIf="mastersOpen">
+        <a routerLink="/pretender/masters/tender-type" routerLinkActive="active">Tender Type</a>
+        <a routerLink="/pretender/masters/number-of-covers" routerLinkActive="active">Number of Covers</a>
+        <a routerLink="/pretender/masters/tender-category" routerLinkActive="active">Tender Category</a>
+        <a routerLink="/pretender/masters/work-item-product-category" routerLinkActive="active">Work Item Product Category</a>
+        <a routerLink="/pretender/masters/number-of-bid-openers" routerLinkActive="active">Number of Bid Openers</a>
+        <a routerLink="/pretender/masters/form-of-contract" routerLinkActive="active">Form of Contract</a>
+        <a routerLink="/pretender/masters/tenderer-class" routerLinkActive="active">Tenderer Class</a>
+      </div>
+      <button class="side-section work-section" [attr.aria-expanded]="pretenderMenuOpen" (click)="togglePretenderMenu()"><span>Pretender</span><span>{{ pretenderMenuOpen ? '⌃' : '⌄' }}</span></button>
+      <div class="side-links" *ngIf="pretenderMenuOpen"><a routerLink="/pretender/tenders/new" routerLinkActive="active">Pre-Tender Details</a></div>
+    </aside>
+    <main class="page-area"><div class="context-tab"><span>Pretender Module</span><span class="tab-close">×</span></div><div class="page-content"><ng-content></ng-content></div></main>
+  </div>
+  <footer class="app-footer"><span>© 2026 Pretender Works &amp; Accounts Management System</span><span>Version 0.1.0 · Development</span></footer>
+</div>
