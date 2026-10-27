@@ -1,2 +1,81 @@
-<div class="page-heading"><div><p class="eyebrow">PRETENDER · PROCUREMENT</p><h1>Pre-Tender Details</h1><p class="subheading">Saved procurement records and their uploaded documents.</p></div><a routerLink="/pretender/tenders/new" class="primary-button">+ Add Tender</a></div>
-<div class="table-card"><div class="table-scroll"><table><thead><tr><th>ID</th><th>Reference Number</th><th>Parent Work</th><th>Procurement Type</th><th>Tender Type</th><th>Category</th><th>Publishing Date</th><th>NIT</th><th>DTCN</th><th>Other</th><th>Action</th></tr></thead><tbody><tr *ngFor="let tender of tenders"><td>{{ tender.id }}</td><td>{{ tender.tenderReferenceNumber }}</td><td>{{ tender.parentWorkNumber || '—' }}</td><td>{{ tender.procurementType }}</td><td>{{ tender.tenderType }}</td><td>{{ tender.tenderCategory }}</td><td>{{ tender.tenderPublishingDateTime | date:'medium' }}</td><td><a *ngIf="tender.nitFileName" [href]="fileUrl(tender.nitFileName)">Download</a><span *ngIf="!tender.nitFileName">—</span></td><td><a *ngIf="tender.dtcnFileName" [href]="fileUrl(tender.dtcnFileName)">Download</a><span *ngIf="!tender.dtcnFileName">—</span></td><td><a *ngIf="tender.otherFileName" [href]="fileUrl(tender.otherFileName)">Download</a><span *ngIf="!tender.otherFileName">—</span></td><td><a [routerLink]="['/pretender/tenders', tender.id, 'edit']">Edit</a></td></tr><tr *ngIf="tenders.length === 0"><td colspan="11" class="empty">No tenders have been added.</td></tr></tbody></table></div></div><p class="feedback error" *ngIf="error">{{ error }}</p>
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">PRETENDER · PROCUREMENT</p>
+    <h1>Pre-Tender Details</h1>
+    <p class="subheading">Saved procurement records and their uploaded documents.</p>
+  </div>
+  <a routerLink="/pretender/tenders/new" class="primary-button">+ Add Tender</a>
+</div>
+
+<div class="table-card">
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Reference Number</th>
+          <th>Parent Work</th>
+          <th>Procurement Type</th>
+          <th>Tender Type</th>
+          <th>Category</th>
+          <th>Publishing Date</th>
+          <th>NIT</th>
+          <th>DTCN</th>
+          <th>Other</th>
+          <th class="actions-header">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tender of tenders">
+          <td>{{ tender.id }}</td>
+          <td>{{ tender.tenderReferenceNumber }}</td>
+          <td>{{ tender.parentWorkNumber || '—' }}</td>
+          <td>{{ tender.procurementType }}</td>
+          <td>{{ tender.tenderType }}</td>
+          <td>{{ tender.tenderCategory }}</td>
+          <td>{{ tender.tenderPublishingDateTime | date:'medium' }}</td>
+          <td>
+            <a *ngIf="tender.nitFileName" [href]="fileUrl(tender.nitFileName)" class="doc-link">Download</a>
+            <span *ngIf="!tender.nitFileName">—</span>
+          </td>
+          <td>
+            <a *ngIf="tender.dtcnFileName" [href]="fileUrl(tender.dtcnFileName)" class="doc-link">Download</a>
+            <span *ngIf="!tender.dtcnFileName">—</span>
+          </td>
+          <td>
+            <a *ngIf="tender.otherFileName" [href]="fileUrl(tender.otherFileName)" class="doc-link">Download</a>
+            <span *ngIf="!tender.otherFileName">—</span>
+          </td>
+          <td class="action-cell">
+            <a
+              [routerLink]="['/pretender/tenders', tender.id, 'edit']"
+              class="icon-action-btn edit-btn"
+              title="Edit Tender"
+              aria-label="Edit"
+            >
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </a>
+            <button
+              type="button"
+              class="icon-action-btn delete-btn"
+              (click)="deleteTender(tender)"
+              title="Delete Tender"
+              aria-label="Delete"
+            >
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="tenders.length === 0">
+          <td colspan="11" class="empty">No tenders have been added.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

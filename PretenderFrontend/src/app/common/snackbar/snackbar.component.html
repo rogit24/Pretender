@@ -1,0 +1,40 @@
+<div class="snackbar-container" *ngIf="items.length > 0" aria-live="polite" role="region">
+  <div
+    *ngFor="let item of items"
+    class="snackbar-pill"
+    [ngClass]="'snackbar-' + item.type"
+    role="alert"
+  >
+    <div class="snackbar-left">
+      <span class="bullet-dot" aria-hidden="true">•</span>
+      <span class="snackbar-message">{{ item.message }}</span>
+    </div>
+
+    <div class="snackbar-actions">
+      <button
+        type="button"
+        class="snackbar-copy-btn"
+        (click)="copyText(item, $event)"
+        title="Copy message to clipboard"
+        aria-label="Copy message"
+      >
+        <svg *ngIf="copiedId !== item.id" class="copy-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span *ngIf="copiedId === item.id" class="copied-indicator">✓ Copied!</span>
+        <span *ngIf="copiedId !== item.id">Copy</span>
+      </button>
+
+      <button
+        type="button"
+        class="snackbar-close-btn"
+        (click)="dismiss(item)"
+        title="Dismiss alert"
+        aria-label="Dismiss"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>

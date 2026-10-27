@@ -1,0 +1,52 @@
+<div
+  *ngIf="dialogState.isOpen"
+  class="dialog-backdrop"
+  (click)="onCancel()"
+  role="presentation"
+>
+  <div
+    class="dialog-card"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'dialog-title'"
+    [attr.aria-describedby]="'dialog-message'"
+  >
+    <!-- TOP-RIGHT SQUARE CLOSE BUTTON (EXACTLY MATCHING IMAGE 2) -->
+    <button
+      type="button"
+      class="dialog-close-btn"
+      (click)="onCancel()"
+      title="Close dialog"
+      aria-label="Close"
+    >
+      ✕
+    </button>
+
+    <!-- DIALOG TITLE -->
+    <h3 id="dialog-title" class="dialog-title">{{ dialogState.title || 'Delete Work?' }}</h3>
+
+    <!-- DIALOG MESSAGE -->
+    <p id="dialog-message" class="dialog-message">{{ dialogState.message || 'Are you sure?' }}</p>
+
+    <!-- ACTION BUTTONS (DARK NAVY OK & RED CANCEL) -->
+    <div class="dialog-actions">
+      <button
+        type="button"
+        class="dialog-btn btn-ok"
+        (click)="onOk()"
+        autoFocus
+      >
+        {{ dialogState.okText || 'Ok' }}
+      </button>
+
+      <button
+        type="button"
+        class="dialog-btn btn-cancel"
+        (click)="onCancel()"
+      >
+        {{ dialogState.cancelText || 'Cancel' }}
+      </button>
+    </div>
+  </div>
+</div>

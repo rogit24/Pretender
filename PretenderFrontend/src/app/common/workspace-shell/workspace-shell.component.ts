@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-@Component({ selector: 'app-workspace-shell', standalone: false, templateUrl: './workspace-shell.component.html', styleUrl: './workspace-shell.component.css' })
+@Component({ selector: 'app-workspace-shell', standalone: false, templateUrl: './workspace-shell.component.html' })
 export class WorkspaceShellComponent {
   activeModule = '';
   mastersOpen = false;

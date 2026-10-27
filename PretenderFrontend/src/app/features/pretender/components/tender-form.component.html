@@ -2,7 +2,15 @@
 <div class="tabs"><button class="tab" [class.active]="activeTab === 'add'" (click)="activeTab='add'" type="button">Add</button><a class="tab-link" routerLink="/pretender/tenders">View</a></div>
 <form *ngIf="activeTab === 'add'" class="tender-form" #tenderForm="ngForm" (ngSubmit)="save()">
   <div class="form-grid">
-    <div class="field span-2 parent-work"><span>Parent Work <small>(optional)</small></span><div class="work-search"><input name="workQuery" [(ngModel)]="workQuery" placeholder="Search work number or description"><button type="button" class="secondary-button" (click)="searchWorks()" [disabled]="worksLoading">{{ worksLoading ? 'Searching…' : 'Search' }}</button></div><small class="mock-note" *ngIf="works.length && works[0].mock">Development sample data — these works are not connected to WAMIS Core.</small><div class="work-results" *ngIf="works.length"><button type="button" *ngFor="let work of works" (click)="selectWork(work)"><strong>{{ work.workNumber }}</strong><span>{{ work.description }}</span></button></div><p class="feedback error" *ngIf="workError">{{ workError }}</p><div class="selected-work" *ngIf="tender.parentWorkId"><strong>Selected: {{ tender.parentWorkNumber }}</strong><span>{{ tender.parentWorkDescription }}</span><button type="button" class="retry-button" (click)="clearWork()">Clear selection</button></div></div>
+    <div class="field full-width work-search-container">
+      <app-work-search
+        [selectedWorkId]="tender.parentWorkId"
+        [selectedWorkNumber]="tender.parentWorkNumber"
+        [selectedWorkDescription]="tender.parentWorkDescription"
+        (workSelected)="selectWork($event)"
+        (workCleared)="clearWork()">
+      </app-work-search>
+    </div>
     <fieldset class="field full-width procurement"><legend>Tender Type (Procurement) <b>*</b></legend><label class="radio-option"><input type="radio" name="procurementType" value="Open Tender" [(ngModel)]="tender.procurementType" required> Open Tender</label><label class="radio-option"><input type="radio" name="procurementType" value="Limited" [(ngModel)]="tender.procurementType"> Limited</label><label class="radio-option"><input type="radio" name="procurementType" value="Open Limited" [(ngModel)]="tender.procurementType"> Open Limited</label><label class="radio-option"><input type="radio" name="procurementType" value="National Competitive Bid (NCB)" [(ngModel)]="tender.procurementType"> National Competitive Bid (NCB)</label><label class="radio-option"><input type="radio" name="procurementType" value="Global Tender" [(ngModel)]="tender.procurementType"> Global Tender</label></fieldset>
     <label class="field"><span>Tender Reference Number <b>*</b></span><input name="tenderReferenceNumber" [(ngModel)]="tender.tenderReferenceNumber" required placeholder="Enter tender reference number"></label>
     <label class="field"><span>Tender Type <b>*</b></span><select name="tenderTypeId" [(ngModel)]="tender.tenderTypeId" required><option [ngValue]="null" disabled>Select tender type</option><option *ngFor="let option of list('tender-type')" [ngValue]="option.id">{{ option.name }}</option></select></label>
@@ -36,6 +44,14 @@
     <label class="field"><span>Upload Other File</span><input type="file" (change)="chooseFile($event, 'otherFileName')"><small *ngIf="tender.otherFileName">Selected: {{ tender.otherFileName }}</small></label>
   </div>
   <p class="feedback loading" *ngIf="mastersLoading || loadingRecord">{{ loadingRecord ? 'Loading record…' : 'Loading dropdown values…' }}</p>
-  <p class="feedback error" *ngIf="error">{{ error }} <button class="retry-button" type="button" (click)="loadMasters()">Retry dropdowns</button></p><p class="feedback success" *ngIf="success">{{ success }}</p>
+  <div class="inline-snackbar-wrapper" *ngIf="error || success">
+    <div class="snackbar-pill" [ngClass]="error ? 'snackbar-error' : 'snackbar-success'">
+      <div class="snackbar-left">
+        <span class="bullet-dot">•</span>
+        <span class="snackbar-message">{{ error || success }}</span>
+      </div>
+      <button *ngIf="error" class="retry-button" type="button" (click)="loadMasters()">Retry dropdowns</button>
+    </div>
+  </div>
   <div class="form-actions"><button class="primary-button" type="submit" [disabled]="tenderForm.invalid || saving || loadingRecord">{{ saving ? 'Saving…' : recordId ? 'Update' : 'Save' }}</button><button class="secondary-button" type="button" (click)="clear()">Cancel</button></div>
 </form>
