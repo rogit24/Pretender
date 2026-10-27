@@ -15,6 +15,9 @@ public class WorksController {
 
     public WorksController(WorksService works) { this.works = works; }
 
+    @GetMapping
+    public List<WorkSummary> listAvailable() { return works.listAvailable(); }
+
     @GetMapping("/search")
     public List<WorkSummary> search(@RequestParam("q") String query) {
         if (query == null || query.isBlank()) throw new IllegalArgumentException("Search query is required");

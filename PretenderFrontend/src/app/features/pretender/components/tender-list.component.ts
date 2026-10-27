@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PretenderApiService } from '../services/pretender-api.service';
 import { TenderRecord } from '../models/pretender.model';
 import { SnackbarService } from '../../../common/services/snackbar.service';
@@ -17,7 +17,7 @@ export class TenderListComponent implements OnInit {
     private readonly api: PretenderApiService,
     private readonly snackbar: SnackbarService,
     private readonly confirmDialog: ConfirmDialogService
-  ) {}
+  ) { }
 
   fileUrl(name: string): string {
     return this.api.fileUrl(name);

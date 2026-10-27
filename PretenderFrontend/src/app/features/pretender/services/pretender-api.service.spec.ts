@@ -22,6 +22,15 @@ describe('PretenderApiService parent-work lookup', () => {
 
   afterEach(() => http.verify());
 
+  it('loads the available works for the parent-work dropdown', () => {
+    let count = 0;
+    api.listWorks().subscribe(rows => count = rows.length);
+    const request = http.expectOne('/api/works');
+    expect(request.request.method).toBe('GET');
+    request.flush([{ id: 'mock-work-1001', workNumber: 'MOCK-WORK-1001', description: 'Sample road', source: 'DEVELOPMENT MOCK — NOT WAMIS CORE', mock: true }]);
+    expect(count).toBe(1);
+  });
+
   it('searches the local works API and returns the clearly marked mock result', () => {
     let result: unknown;
     api.searchWorks('bridge').subscribe(value => result = value);
